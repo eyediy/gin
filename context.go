@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin/binding"
-	"github.com/gin-gonic/gin/render"
+	"github.com/eyediy/gin/binding"
+	"github.com/eyediy/gin/render"
 	"github.com/manucorporat/sse"
 	"golang.org/x/net/context"
 )
