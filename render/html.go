@@ -12,6 +12,7 @@ import (
 type (
 	HTMLRender interface {
 		Instance(string, interface{}) Render
+		Funcs(fm template.FuncMap)
 	}
 
 	HTMLProduction struct {
@@ -21,6 +22,7 @@ type (
 	HTMLDebug struct {
 		Files []string
 		Glob  string
+		FuncMaps template.FuncMap
 	}
 
 	HTML struct {
@@ -32,6 +34,15 @@ type (
 
 var htmlContentType = []string{"text/html; charset=utf-8"}
 
+func (r HTMLProduction) Funcs(fm template.FuncMap) {
+	r.Template.Funcs(fm)
+}
+func (r HTMLDebug) Funcs(fm template.FuncMap) {
+	for name, fn := range fm {
+		r.FuncMaps[name] = fn
+	}
+}
+
 func (r HTMLProduction) Instance(name string, data interface{}) Render {
 	return HTML{
 		Template: r.Template,
@@ -41,13 +52,17 @@ func (r HTMLProduction) Instance(name string, data interface{}) Render {
 }
 
 func (r HTMLDebug) Instance(name string, data interface{}) Render {
-	return HTML{
-		Template: r.loadTemplate(),
+	html := HTML{
+		Template: r.LoadTemplate(),
 		Name:     name,
 		Data:     data,
 	}
+	if r.FuncMaps != nil {
+		html.Template.Funcs(r.FuncMaps)
+	}
+	return html
 }
-func (r HTMLDebug) loadTemplate() *template.Template {
+func (r HTMLDebug) LoadTemplate() *template.Template {
 	if len(r.Files) > 0 {
 		return template.Must(template.ParseFiles(r.Files...))
 	}
